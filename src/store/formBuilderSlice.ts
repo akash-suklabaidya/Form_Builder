@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
-import {type FieldConfig } from '../types/FieldConfig';
+import { type FieldConfig } from '../types/FieldConfig';
 import { v4 as uuidv4 } from 'uuid';
 
 interface FormBuilderState {
@@ -31,7 +31,9 @@ const formBuilderSlice = createSlice({
       const [removed] = state.fields.splice(action.payload.startIndex, 1);
       state.fields.splice(action.payload.endIndex, 0, removed);
     },
-    resetFormBuilder: () => initialState,
+    resetFormBuilder: (state) => {
+      state.fields = [];
+    },
   },
 });
 
@@ -43,3 +45,6 @@ export const {
   resetFormBuilder,
 } = formBuilderSlice.actions;
 export default formBuilderSlice.reducer;
+
+
+
