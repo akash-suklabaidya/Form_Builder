@@ -10,14 +10,13 @@ import {
     Paper,
     IconButton,
     TextField,
-    Container, // We no longer need Grid, so it can be removed
+    Container, Snackbar, Alert
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FieldEditor from "../components/FieldEditor";
 import { saveFormSchema } from "../utils/localStorage";
 import { nanoid } from "nanoid";
 
-/* dnd-kit imports */
 import {
     DndContext,
     closestCenter,
@@ -33,7 +32,6 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-// SortableField component (no changes needed here)
 const SortableField: React.FC<{
     field: FieldConfig;
     onEdit: (id: string) => void;
@@ -92,6 +90,16 @@ export default function CreateForm() {
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
     );
 
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+    const handleSave = useCallback(() => {
+        saveFormSchema(formName, fields);
+        setSnackbarOpen(true);
+        setTimeout(() => {
+            window.location.reload();
+        }, 1500); // wait for snackbar to show, then refresh
+    }, [formName, fields]);
+
     const handleDragEnd = useCallback(
         (event: DragEndEvent) => {
             const { active, over } = event;
@@ -127,14 +135,11 @@ export default function CreateForm() {
 
     return (
         <Container maxWidth="lg" sx={{ mt: 4 }}>
-            {/* FIXED: Replaced Grid with a standard, reliable Flexbox layout using Box */}
             <Box sx={{
                 display: 'flex',
-                // On small screens (xs), stack vertically. On medium screens (md) and up, place side-by-side.
                 flexDirection: { xs: 'column', md: 'row' },
-                gap: 4 // This creates the space between the two columns
+                gap: 4
             }}>
-                {/* Left Column (5/12 width on medium screens) */}
                 <Box sx={{ width: { xs: '100%', md: '41.66%' } }}>
                     <Box display="flex" flexDirection="column" height="100%">
                         <Button
@@ -183,16 +188,26 @@ export default function CreateForm() {
                                 variant="contained"
                                 size="large"
                                 fullWidth
-                                onClick={() => saveFormSchema(formName, fields)}
+                                onClick={handleSave}
                                 disabled={!formName.trim() || fields.length === 0}
                             >
                                 Save
                             </Button>
+
+                            <Snackbar
+                                open={snackbarOpen}
+                                autoHideDuration={1500}
+                                onClose={() => setSnackbarOpen(false)}
+                                anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+                            >
+                                <Alert onClose={() => setSnackbarOpen(false)} severity="success" sx={{ width: '100%' }}>
+                                    Form saved successfully!
+                                </Alert>
+                            </Snackbar>
                         </Box>
                     </Box>
                 </Box>
 
-                {/* Right Column (7/12 width on medium screens) */}
                 <Box sx={{ width: { xs: '100%', md: '58.33%' } }}>
                     <Paper
                         variant="outlined"
@@ -213,3 +228,8 @@ export default function CreateForm() {
         </Container>
     );
 }
+
+
+
+
+

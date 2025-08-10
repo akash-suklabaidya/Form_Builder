@@ -11,7 +11,6 @@ import {
 } from '@mui/material';
 import { getForms } from '../utils/localStorage';
 
-// Define the structure of a saved form for TypeScript
 interface SavedForm {
     id: string;
     name: string;
@@ -23,13 +22,11 @@ export default function MyFormsPage() {
     const [forms, setForms] = useState<SavedForm[]>([]);
     const navigate = useNavigate();
 
-    // Load forms from localStorage when the component mounts
     useEffect(() => {
         setForms(getForms());
     }, []);
 
     const handleFormClick = (formId: string) => {
-        // Navigate to the preview page with the specific form ID
         console.log('Attempting to navigate to preview with form ID:', formId);
         navigate(`/preview/${formId}`);
     };

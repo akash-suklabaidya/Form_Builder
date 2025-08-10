@@ -1,10 +1,6 @@
-// src/styles/theme.ts
-
 import { createTheme } from '@mui/material/styles';
 
-// This is your central theme configuration file
 export const theme = createTheme({
-  // Section 1: Color Palette
   palette: {
     mode: 'light',
     primary: {
@@ -29,7 +25,6 @@ export const theme = createTheme({
     },
   },
 
-  // Section 2: Typography (Fonts)
   typography: {
     fontFamily: '"Inter", "Helvetica", "Arial", sans-serif',
     h1: {
@@ -51,13 +46,11 @@ export const theme = createTheme({
     }
   },
 
-  // Section 3: Component Shape & Style Overrides
   shape: {
     borderRadius: 12, // Softer, more modern corners
   },
 
   components: {
-    // Example of overriding a specific component's style
     MuiButton: {
       styleOverrides: {
         root: {
@@ -73,7 +66,7 @@ export const theme = createTheme({
         variant: 'outlined', // Ensures all text fields are consistent
       },
     },
-     MuiCard: {
+    MuiCard: {
       styleOverrides: {
         root: {
           boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.05)', // A subtle shadow for cards
