@@ -15,8 +15,8 @@ export interface ValidationRules {
 }
 
 export interface DerivedField {
-    parents: string[];
-    formula: string;
+    parents?: string[];
+    formula?: string;
 }
 
 
