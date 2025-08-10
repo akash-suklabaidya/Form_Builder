@@ -10,13 +10,15 @@ import {
     Paper,
     IconButton,
     TextField,
-    Container, Snackbar, Alert
+    Container,
+    Snackbar,
+    Alert,
+    Tooltip
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import FieldEditor from "../components/FieldEditor";
 import { saveFormSchema } from "../utils/localStorage";
 import { nanoid } from "nanoid";
-
 import {
     DndContext,
     closestCenter,
@@ -36,7 +38,8 @@ const SortableField: React.FC<{
     field: FieldConfig;
     onEdit: (id: string) => void;
     onDelete: (id: string) => void;
-}> = React.memo(({ field, onEdit, onDelete }) => {
+    tooltipOpen: boolean;
+}> = React.memo(({ field, onEdit, onDelete, tooltipOpen }) => {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
         useSortable({ id: field.id });
 
@@ -47,40 +50,58 @@ const SortableField: React.FC<{
     };
 
     return (
-        <Box
-            ref={setNodeRef}
-            {...attributes}
-            {...listeners}
-            onClick={() => onEdit(field.id)}
-            sx={{
-                mb: 1, p: 2, border: "1px solid #e0e0e0", borderRadius: 2, bgcolor: "background.paper",
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-                cursor: "grab", userSelect: "none", "&:hover": { borderColor: 'primary.main' }
-            }}
-            style={style}
-            aria-roledescription="Draggable field"
+        <Tooltip
+            open={tooltipOpen}
+            title="Click here to customize field"
+            placement="right"
+            arrow
         >
-            <Typography sx={{ fontWeight: 'medium' }}>
-                {field.label || `Untitled ${field.type} field`}
-            </Typography>
-            <IconButton
-                aria-label={`Delete ${field.label || field.type}`}
-                size="small"
-                onClick={(e) => { e.stopPropagation(); onDelete(field.id); }}
+            <Box
+                ref={setNodeRef}
+                {...attributes}
+                {...listeners}
+                onClick={() => onEdit(field.id)}
+                sx={{
+                    mb: 1,
+                    p: 2,
+                    border: "1px solid #e0e0e0",
+                    borderRadius: 2,
+                    bgcolor: "background.paper",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    cursor: "grab",
+                    userSelect: "none",
+                    "&:hover": { borderColor: 'primary.main' }
+                }}
+                style={style}
+                aria-roledescription="Draggable field"
             >
-                <DeleteIcon />
-            </IconButton>
-        </Box>
+                <Typography sx={{ fontWeight: 'medium' }}>
+                    {field.label || `Untitled ${field.type} field`}
+                </Typography>
+                <IconButton
+                    aria-label={`Delete ${field.label || field.type}`}
+                    size="small"
+                    onClick={(e) => { e.stopPropagation(); onDelete(field.id); }}
+                >
+                    <DeleteIcon />
+                </IconButton>
+            </Box>
+        </Tooltip>
     );
 });
 SortableField.displayName = "SortableField";
-
 
 export default function CreateForm() {
     const dispatch = useDispatch<AppDispatch>();
     const fields = useSelector((state: RootState) => state.formBuilder.fields);
     const [editingField, setEditingField] = useState<string | null>(null);
     const [formName, setFormName] = useState("");
+
+    const [tooltipOpen, setTooltipOpen] = useState(false);
+    const [firstTooltipShown, setFirstTooltipShown] = useState(false);
+    const [highlightSave, setHighlightSave] = useState(false);
 
     useEffect(() => {
         dispatch(resetFormBuilder());
@@ -97,7 +118,7 @@ export default function CreateForm() {
         setSnackbarOpen(true);
         setTimeout(() => {
             window.location.reload();
-        }, 1500); // wait for snackbar to show, then refresh
+        }, 1500);
     }, [formName, fields]);
 
     const handleDragEnd = useCallback(
@@ -121,7 +142,21 @@ export default function CreateForm() {
         };
         dispatch(addField(newField));
         setEditingField(newField.id);
-    }, [dispatch, fields.length]);
+
+        // Highlight Save section after first field added
+        setHighlightSave(true);
+        setTimeout(() => setHighlightSave(false), 2000);
+
+        if (!firstTooltipShown) {
+            setTimeout(() => {
+                setTooltipOpen(true);
+                setTimeout(() => {
+                    setTooltipOpen(false);
+                }, 4000); // hide after 4 seconds
+            }, 50);
+            setFirstTooltipShown(true);
+        }
+    }, [dispatch, fields.length, firstTooltipShown]);
 
     const onDeleteField = useCallback(
         (id: string) => {
@@ -152,7 +187,14 @@ export default function CreateForm() {
                         </Button>
                         <Paper
                             variant="outlined"
-                            sx={{ p: 2, flexGrow: 1, borderColor: '#e0e0e0' }}
+                            // sx={{ p: 2, flexGrow: 1, borderColor: '#e0e0e0' }}
+                            sx={{
+                                p: 2,
+                                borderColor: '#e0e0e0',
+                                mb: 2, // space between list and save section
+                                maxHeight: '60vh', // optional: limit height if many fields
+                                overflowY: 'auto'   // scroll if needed
+                            }}
                         >
                             <DndContext
                                 sensors={sensors}
@@ -160,12 +202,13 @@ export default function CreateForm() {
                                 onDragEnd={handleDragEnd}
                             >
                                 <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-                                    {fields.length > 0 ? fields.map((field) => (
+                                    {fields.length > 0 ? fields.map((field, index) => (
                                         <SortableField
                                             key={field.id}
                                             field={field}
                                             onEdit={setEditingField}
                                             onDelete={onDeleteField}
+                                            tooltipOpen={tooltipOpen && index === fields.length - 1}
                                         />
                                     )) : (
                                         <Typography sx={{ color: 'text.secondary', textAlign: 'center', mt: 4 }}>
@@ -175,24 +218,54 @@ export default function CreateForm() {
                                 </SortableContext>
                             </DndContext>
                         </Paper>
-                        <Box mt={2}>
+
+                        {/* Save Form Section */}
+                        <Paper
+                            elevation={3}
+                            sx={{
+                                p: 2,
+                                mt: 3,
+                                borderRadius: 2,
+                                border: '2px solid',
+                                borderColor: highlightSave ? 'primary.main' : 'transparent',
+                                transition: 'border-color 0.3s ease'
+                            }}
+                        >
+                            <Typography variant="h6" sx={{ mb: 1 }}>
+                                Save Your Form
+                            </Typography>
                             <TextField
                                 fullWidth
-                                label="Form name"
+                                label="Form Name"
                                 variant="outlined"
                                 value={formName}
                                 onChange={(e) => setFormName(e.target.value)}
-                                sx={{ mb: 2 }}
+                                sx={{ mb: 1 }}
+                                helperText="Enter a unique name to save and reuse later"
                             />
-                            <Button
-                                variant="contained"
-                                size="large"
-                                fullWidth
-                                onClick={handleSave}
-                                disabled={!formName.trim() || fields.length === 0}
+                            <Tooltip
+                                title={
+                                    !formName.trim()
+                                        ? "Please enter a form name"
+                                        : fields.length === 0
+                                            ? "Add at least one field before saving"
+                                            : ""
+                                }
+                                arrow
+                                disableHoverListener={formName.trim().length > 0 && fields.length > 0}
                             >
-                                Save
-                            </Button>
+                                <span>
+                                    <Button
+                                        variant="contained"
+                                        size="large"
+                                        fullWidth
+                                        onClick={handleSave}
+                                        disabled={!formName.trim() || fields.length === 0}
+                                    >
+                                        Save Form
+                                    </Button>
+                                </span>
+                            </Tooltip>
 
                             <Snackbar
                                 open={snackbarOpen}
@@ -204,7 +277,7 @@ export default function CreateForm() {
                                     Form saved successfully!
                                 </Alert>
                             </Snackbar>
-                        </Box>
+                        </Paper>
                     </Box>
                 </Box>
 
@@ -228,8 +301,3 @@ export default function CreateForm() {
         </Container>
     );
 }
-
-
-
-
-
