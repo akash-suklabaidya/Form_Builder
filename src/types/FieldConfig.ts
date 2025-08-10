@@ -11,7 +11,7 @@ export interface ValidationRules {
     minLength?: number;
     maxLength?: number;
     email?: boolean;
-    passwordRule: boolean;
+    passwordRule?: boolean;
 }
 
 export interface DerivedField {
