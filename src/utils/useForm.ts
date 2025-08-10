@@ -19,7 +19,7 @@ const calculateDerivedField = (field: FieldConfig, formState: any) => {
     if (!field.derived) return '';
 
     const { formula, parents } = field.derived;
-    const parentValues = parents.map(pId => formState[pId] || '');
+    const parentValues = (parents ?? []).map(pId => formState[pId] || '');
 
     switch (formula) {
         case 'ageFromDob': {
@@ -76,7 +76,7 @@ export const useForm = (fields: FieldConfig[]) => {
         setFormState((currentState: any) => {
             const updatedState = { ...currentState, [id]: value };
             fields.forEach(field => {
-                if (field.derived && field.derived.parents.includes(id)) {
+                if (field.derived && (field.derived.parents ?? []).includes(id)) {
                     updatedState[field.id] = calculateDerivedField(field, updatedState);
                 }
             });
