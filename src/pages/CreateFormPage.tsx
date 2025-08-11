@@ -116,6 +116,9 @@ export default function CreateForm() {
     const handleSave = useCallback(() => {
         saveFormSchema(formName, fields);
         setSnackbarOpen(true);
+
+        localStorage.setItem("showMyFormsTooltip", "true");
+
         setTimeout(() => {
             window.location.reload();
         }, 1500);
@@ -143,7 +146,6 @@ export default function CreateForm() {
         dispatch(addField(newField));
         setEditingField(newField.id);
 
-        // Highlight Save section after first field added
         setHighlightSave(true);
         setTimeout(() => setHighlightSave(false), 2000);
 
@@ -152,7 +154,7 @@ export default function CreateForm() {
                 setTooltipOpen(true);
                 setTimeout(() => {
                     setTooltipOpen(false);
-                }, 4000); // hide after 4 seconds
+                }, 4000);
             }, 50);
             setFirstTooltipShown(true);
         }
@@ -187,13 +189,12 @@ export default function CreateForm() {
                         </Button>
                         <Paper
                             variant="outlined"
-                            // sx={{ p: 2, flexGrow: 1, borderColor: '#e0e0e0' }}
                             sx={{
                                 p: 2,
                                 borderColor: '#e0e0e0',
-                                mb: 2, // space between list and save section
-                                maxHeight: '60vh', // optional: limit height if many fields
-                                overflowY: 'auto'   // scroll if needed
+                                mb: 2,
+                                maxHeight: '60vh',
+                                overflowY: 'auto'
                             }}
                         >
                             <DndContext
@@ -219,7 +220,6 @@ export default function CreateForm() {
                             </DndContext>
                         </Paper>
 
-                        {/* Save Form Section */}
                         <Paper
                             elevation={3}
                             sx={{
