@@ -93,9 +93,7 @@ export const FormField: React.FC<Props> = ({ field, value, error, onChange }) =>
                         onChange={(e) => onChange(field.id, e.target.value)}
                         displayEmpty
                     >
-                        {/* <MenuItem value="">
-                            <em>Choose</em>
-                        </MenuItem> */}
+
                         {(field.options || []).map((opt, i) => (
                             <MenuItem key={i} value={opt}>
                                 {opt}

@@ -71,7 +71,6 @@ export default function FieldEditor({ fieldId }: FieldEditorProps) {
   const update = useCallback(
     (key: keyof FieldConfig | string, value: any) => {
       if (!field) return;
-      // allow string keys like 'question' even if not in FieldConfig type
       const next: any = { ...field, [key]: value };
       dispatch(updateField(next as FieldConfig));
     },
@@ -81,7 +80,14 @@ export default function FieldEditor({ fieldId }: FieldEditorProps) {
   const updateDerived = useCallback(
     (derivedKey: string, value: any) => {
       if (!field) return;
-      dispatch(updateField({ ...field, derived: { ...field.derived, [derivedKey]: value } }));
+
+      const currentDerived = field.derived || {};
+      dispatch(
+        updateField({
+          ...field,
+          derived: { ...currentDerived, [derivedKey]: value },
+        })
+      );
     },
     [dispatch, field]
   );

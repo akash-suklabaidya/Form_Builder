@@ -1,3 +1,4 @@
+
 import { HashRouter as Router, Routes, Route } from 'react-router-dom';
 import CreateFormPage from './pages/CreateFormPage';
 import FormPreview from './pages/FormPreview';
@@ -12,6 +13,9 @@ function App() {
         <Routes>
           <Route path="/" element={<CreateFormPage />} />
           <Route path="/myforms" element={<MyFormsPage />} />
+
+          <Route path="/preview" element={<FormPreview />} />
+
           <Route path="/preview/:formId" element={<FormPreview />} />
         </Routes>
       </main>
@@ -20,5 +24,3 @@ function App() {
 }
 
 export default App;
-
-

@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { addField, deleteField, reorderFields, resetFormBuilder } from "../store/formBuilderSlice";
-import type { RootState, AppDispatch } from "../store/store";
-import type { FieldConfig, FieldType } from "../types/FieldConfig";
+import React, { useCallback, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { addField, deleteField, reorderFields, resetFormBuilder } from '../store/formBuilderSlice';
+import type { RootState, AppDispatch } from '../store/store';
+import type { FieldConfig, FieldType } from '../types/FieldConfig';
 import {
     Box,
     Button,
@@ -13,12 +14,14 @@ import {
     Container,
     Snackbar,
     Alert,
-    Tooltip
-} from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import FieldEditor from "../components/FieldEditor";
-import { saveFormSchema } from "../utils/localStorage";
-import { nanoid } from "nanoid";
+    Tooltip,
+    Stack,
+} from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import FieldEditor from '../components/FieldEditor';
+import { saveFormSchema } from '../utils/localStorage';
+import { nanoid } from 'nanoid';
 import {
     DndContext,
     closestCenter,
@@ -26,13 +29,13 @@ import {
     useSensor,
     useSensors,
     type DragEndEvent,
-} from "@dnd-kit/core";
+} from '@dnd-kit/core';
 import {
     SortableContext,
     verticalListSortingStrategy,
     useSortable,
-} from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const SortableField: React.FC<{
     field: FieldConfig;
@@ -64,14 +67,14 @@ const SortableField: React.FC<{
                 sx={{
                     mb: 1,
                     p: 2,
-                    border: "1px solid #e0e0e0",
+                    border: '1px solid #e0e0e0',
                     borderRadius: 2,
-                    bgcolor: "background.paper",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    cursor: "grab",
-                    userSelect: "none",
+                    bgcolor: 'background.paper',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'grab',
+                    userSelect: 'none',
                     "&:hover": { borderColor: 'primary.main' }
                 }}
                 style={style}
@@ -95,6 +98,7 @@ SortableField.displayName = "SortableField";
 
 export default function CreateForm() {
     const dispatch = useDispatch<AppDispatch>();
+    const navigate = useNavigate();
     const fields = useSelector((state: RootState) => state.formBuilder.fields);
     const [editingField, setEditingField] = useState<string | null>(null);
     const [formName, setFormName] = useState("");
@@ -102,10 +106,6 @@ export default function CreateForm() {
     const [tooltipOpen, setTooltipOpen] = useState(false);
     const [firstTooltipShown, setFirstTooltipShown] = useState(false);
     const [highlightSave, setHighlightSave] = useState(false);
-
-    useEffect(() => {
-        dispatch(resetFormBuilder());
-    }, [dispatch]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -116,13 +116,22 @@ export default function CreateForm() {
     const handleSave = useCallback(() => {
         saveFormSchema(formName, fields);
         setSnackbarOpen(true);
-
         localStorage.setItem("showMyFormsTooltip", "true");
 
-        setTimeout(() => {
-            window.location.reload();
-        }, 1500);
-    }, [formName, fields]);
+        dispatch(resetFormBuilder());
+        setFormName("");
+        setEditingField(null);
+
+    }, [formName, fields, dispatch]);
+
+    const handlePreview = useCallback(() => {
+        const formSchemaForPreview = {
+            id: 'preview_id',
+            name: formName || 'Untitled Form',
+            fields,
+        };
+        navigate('/preview', { state: { formSchema: formSchemaForPreview } });
+    }, [navigate, formName, fields]);
 
     const handleDragEnd = useCallback(
         (event: DragEndEvent) => {
@@ -179,14 +188,30 @@ export default function CreateForm() {
             }}>
                 <Box sx={{ width: { xs: '100%', md: '41.66%' } }}>
                     <Box display="flex" flexDirection="column" height="100%">
-                        <Button
-                            variant="contained"
-                            size="large"
-                            onClick={onAddField}
-                            sx={{ mb: 2 }}
-                        >
-                            + Add new field
-                        </Button>
+                        <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
+                            <Button
+                                variant="contained"
+                                size="large"
+                                onClick={onAddField}
+                                sx={{ flexGrow: 1 }}
+                            >
+                                + Add new field
+                            </Button>
+                            <Tooltip title="Preview current form">
+                                <span>
+                                    <Button
+                                        variant="outlined"
+                                        size="large"
+                                        onClick={handlePreview}
+                                        disabled={fields.length === 0}
+                                        startIcon={<VisibilityIcon />}
+                                    >
+                                        Preview
+                                    </Button>
+                                </span>
+                            </Tooltip>
+                        </Stack>
+
                         <Paper
                             variant="outlined"
                             sx={{
@@ -269,7 +294,7 @@ export default function CreateForm() {
 
                             <Snackbar
                                 open={snackbarOpen}
-                                autoHideDuration={1500}
+                                autoHideDuration={3000}
                                 onClose={() => setSnackbarOpen(false)}
                                 anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
                             >
