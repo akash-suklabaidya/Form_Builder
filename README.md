@@ -1,69 +1,76 @@
-# React + TypeScript + Vite
+# Dynamic Form Builder
+A small, friendly React + TypeScript app that lets you build forms visually — add fields, set validations, create derived (computed) fields, reorder everything with drag-and-drop, and save form schemas to localStorage. Built with MUI for quick, clean UI and Redux Toolkit for predictable state.
+---
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Table of Contents
+- [Demo / Screenshot](#demo--screenshot)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Install](#install)
+  - [Run](#run)
+  - [Build](#build)
+- [How to Use](#routes--how-to-use)
+---
+## Demo / Screenshot
+<img width="1366" height="525" alt="image" src="https://github.com/user-attachments/assets/1c0da9ad-5eb1-4050-8187-466a92fa1ce7" />
+---
 
-Currently, two official plugins are available:
+## Features
+- Add fields: Text, Number, Textarea, Select, Radio, Checkbox, Date.
+- Configure each field: label, default value, required, min/max, pattern, custom rules.
+- Create derived fields (computed from other fields using safe expressions).
+- Live preview: validations run and derived fields update as you type.
+- Reorder fields with drag-and-drop (dnd-kit recommended).
+- Save form schemas (not form data) to localStorage so you can open them later.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## Expanding the ESLint configuration
+## Tech Stack
+- React (hooks)
+- TypeScript (strict)
+- Material-UI (MUI)
+- Redux Toolkit
+- dnd-kit for drag & drop
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Getting Started
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### Prerequisites
+- Node.js >= 16
+- npm or yarn
+- Git
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### Install
+```bash
+git clone <your-repo-url>
+cd Form_Builder
+npm install
+```
+### Run
+```bash
+npm run dev
+# open http://localhost:3000
+```
+### Build
+```bash
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## How to Use
+### `/create` — Build a Form
+- Click **Add new field**
+- Click a field to edit its settings in the right panel
+- Reorder fields by dragging them
+- Enter a unique form name and click **Save Form** to persist the schema
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### `/preview` — Test the Form
+- Fill out the form and check validations
+- Validation errors show inline
+- Derived fields are **read-only** and update live as you type
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### `/myforms` — Manage Saved Schemas
+- View all saved schemas
+- Load a schema into the builder or open it in preview mode
